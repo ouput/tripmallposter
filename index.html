@@ -79,6 +79,22 @@ button.gr{background:#5a8}
 .lblank{background:#fcfcfc}
 .lsup{font-size:12.5px;color:#555}
 .ltier{font-size:12.5px}
+/* 报价单（双栏比价） */
+.qsec{background:var(--bigbg);font-weight:800;font-size:15px;text-align:left;padding-left:10px}
+.qsup{text-align:center;font-weight:700;font-size:13.5px;background:var(--smallbg)}
+.qname{font-size:13.5px;line-height:1.25;padding:3px 5px}
+.qname b{font-weight:700}
+.qname i{display:block;font-style:normal;color:#555;font-size:12px;margin-top:2px}
+.qimg{text-align:center;padding:0}
+.qimg img{max-width:100%;max-height:62px;object-fit:contain;display:block;margin:0 auto}
+.qprice{text-align:center;color:var(--accent);font-weight:700;font-size:13.5px;line-height:1.3}
+.qprice i{display:block;font-style:normal;color:#666;font-weight:400;font-size:11.5px;margin-top:2px}
+.lcard.s34 .qsec{font-size:14px}
+.lcard.s34 .qname{font-size:12.5px}
+.lcard.s34 .qname i{font-size:11px}
+.lcard.s34 .qsup{font-size:12.5px}
+.lcard.s34 .qprice{font-size:12.5px}
+.lcard.s34 .qprice i{font-size:10.5px}
 .lfoot{position:absolute;left:18px;right:18px;bottom:8px;display:flex;justify-content:space-between;font-size:11px;color:#888}
 
 /* ===== 采购清单 · 小红书 3:4 版（1080×1440，导出 ×2 = 2160×2880） ===== */
@@ -198,6 +214,7 @@ button.gr{background:#5a8}
 <p class="hint" id="hint">每行一个商品ID（空格/换行分隔）。从后台商品库取名称/价格/主图/多标签，按所选模板出图。</p>
 <label>海报模板</label>
 <div class="mode"><button class="on" id="tb-white" onclick="setTpl('white')">白底模板</button><button id="tb-red" onclick="setTpl('red')">红色大促</button><button id="tb-gold" onclick="setTpl('gold')">金色推荐</button><button id="tb-table" onclick="setTpl('table')">表格模式</button><button id="tb-list" onclick="setTpl('list')">采购清单</button></div>
+<div class="mode" style="margin-top:6px"><button id="tb-quote" onclick="setTpl('quote')">报价单（双栏比价）</button></div>
 <div id="listSize" style="display:none">
   <div id="listTplRow">
     <label>清单类型</label>
@@ -207,6 +224,7 @@ button.gr{background:#5a8}
   <div class="mode"><button class="on" id="ls-a4" onclick="setListSize('a4')">A4 竖版</button><button id="ls-s34" onclick="setListSize('s34')">小红书 3:4</button></div>
   <label>表格配色</label>
   <div class="mode"><button class="on" id="thm-orig" onclick="setListTheme('orig')">原版</button><button id="thm-blue" onclick="setListTheme('blue')">蓝</button><button id="thm-red" onclick="setListTheme('red')">红</button><button id="thm-green" onclick="setListTheme('green')">绿</button><button id="thm-gold" onclick="setListTheme('gold')">金</button><button id="thm-mono" onclick="setListTheme('mono')">黑白</button></div>
+  <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer"><input type="checkbox" id="blankPrice" style="width:auto;margin:0" onchange="setBlankPrice(this.checked)"> 价格留空（社媒版，发布用）</label>
 </div>
 <label>版式</label>
 <div class="mode"><button class="on" id="mb-grid" onclick="setMode('grid')">4商品拼版</button><button id="mb-single" onclick="setMode('single')">单商品竖版</button></div>
@@ -306,7 +324,7 @@ async function pollProgress(){
   }
 }
 async function reloadData(){ await loadData(true); await loadMeta(); alert('数据已刷新'); }
-function setTpl(t){tpl=t;['white','red','gold','table','list'].forEach(function(k){var b=document.getElementById('tb-'+k); if(b) b.classList.toggle('on',t===k);});gen();}
+function setTpl(t){tpl=t;['white','red','gold','table','list','quote'].forEach(function(k){var b=document.getElementById('tb-'+k); if(b) b.classList.toggle('on',t===k);});gen();}
 function setMode(m){mode=m;document.getElementById('mb-grid').classList.toggle('on',m==='grid');document.getElementById('mb-single').classList.toggle('on',m==='single');gen();}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var UNIT_WORDS=['件','个','只','支','条','套','瓶','包','袋','盒','箱','桶','张','台','把','块','片','组','份','卷','米','公斤','对','副','听','罐','床','捆','扎','双','顶','扇','盏','匹','部','艘','辆','间','位','次','天','平方','平方米','码','磅'];
@@ -557,7 +575,7 @@ function tblRowHTML(r){
   if(r._prodSpan>0) h+='<td class="limg" rowspan="'+r._prodSpan+'">'+(r.img?'<img src="'+r.img+'" crossorigin="anonymous">':'')+'</td>';
   h+='<td class="lc">'+esc(r.spec)+'</td>';
   if(r._prodSpan>0) h+='<td class="lstd">'+(r.stdText?esc(r.stdText):stdHTML(r.std))+'</td>';
-  h+='<td class="lprice">'+esc(r.price)+' 元/'+esc(r.unit)+'</td>';
+  h+='<td class="lprice">'+esc(LIST_BLANK_PRICE ? '' : (r.price+' 元/'+r.unit))+'</td>';
   return h+'</tr>';
 }
 function tblProbeRow(r){
@@ -566,7 +584,7 @@ function tblProbeRow(r){
   h+='<td class="limg" rowspan="1">'+(r.img?'<img src="'+r.img+'" crossorigin="anonymous">':'')+'</td>';
   h+='<td class="lc">'+esc(r.spec)+'</td>';
   h+='<td class="lstd">'+(r.stdText?esc(r.stdText):stdHTML(r.std))+'</td>';
-  h+='<td class="lprice">'+esc(r.price)+' 元/'+esc(r.unit)+'</td>';
+  h+='<td class="lprice">'+esc(LIST_BLANK_PRICE ? '' : (r.price+' 元/'+r.unit))+'</td>';
   return h+'</tr>';
 }
 function tblPageHTML(pg,pi,total){
@@ -611,6 +629,92 @@ function tableCard(items){
   return out+'</div>';
 }
 /* ===================== 采购清单模式（A4 竖版） ===================== */
+/* ===== 报价单（双栏比价版）：供应商 | 产品介绍 | 图片 | 价格 × 2 栏 ===== */
+var QUOTE_COLS_A4=[392,100,110, 392,100,110];          // 每栏 602，合计 1204
+var QUOTE_COLS_S34=[342,86,94, 342,86,94];             // 每栏 522，合计 1044
+function quoteCols(){ return LIST_SIZE==='s34'?QUOTE_COLS_S34:QUOTE_COLS_A4; }
+function qColgroup(){
+  var C=quoteCols(), h='';
+  for(var i=0;i<C.length;i++) h+='<col style="width:'+C[i]+'px">';
+  return '<colgroup>'+h+'</colgroup>';
+}
+function qSpec(p){
+  var props=p.props||[], out=[];
+  ['克重','克重分类','净含量','单瓶容量','单支容量','容量分类','尺寸','层数','纸浆类型','材质','面料材质','支数规格','纱支规格','平方克重','填充物','制作工艺','面料'].forEach(function(k){
+    if(out.length>=2) return;
+    var v=propOf(props,k);
+    if(v) out.push((/克重|净含量|容量|平方克重/.test(k)?'':'')+v);
+  });
+  return out.join(' / ');
+}
+function qBox(p){
+  var b=propOf(p.props,'箱规');
+  return b?b.replace(/\s+/g,''):'';
+}
+function qCellHTML(p){
+  if(!p) return '<td class="qname"></td><td class="qimg"></td><td class="qprice"></td>';
+  var unit=p.unit||'件', spec=qSpec(p), box=qBox(p);
+  return '<td class="qname"><b>'+esc(String(p.name||'').slice(0,34))+'</b>'+(spec?'<i>'+esc(spec)+'</i>':'')+'</td>'
+    +'<td class="qimg">'+(p.img?'<img src="'+p.img+'" crossorigin="anonymous">':'')+'</td>'
+    +'<td class="qprice">'+(LIST_BLANK_PRICE ? (box?'<i>'+esc(box)+'</i>':'') : esc(p.price)+'元/'+esc(unit)+(box?'<i>'+esc(box)+'</i>':''))+'</td>';
+}
+function qRowHTML(r){
+  if(r.type==='sec') return '<tr><td class="qsec" colspan="6">'+esc(r.text)+'</td></tr>';
+  return '<tr>'+qCellHTML(r.left)+qCellHTML(r.right)+'</tr>';
+}
+function quoteRows(groups){
+  var rows=[];
+  groups.forEach(function(g){
+    g.cats.forEach(function(c){
+      rows.push({type:'sec',text:g.big+' · '+c.cat});
+      for(var i=0;i<c.picks.length;i+=2) rows.push({type:'pair',left:c.picks[i],right:c.picks[i+1]||null,h:(c.hs?c.hs[i]:90)});
+    });
+  });
+  return rows;
+}
+function quoteCard(){
+  var groups=listGroupsRows();
+  if(!groups.length) return '<div class="'+listPagesCls()+'"><div class="'+listCardCls()+'"><div class="ltitle">酒店用品报价单</div><div class="lsub">没有可用数据（请勾选品类）</div></div></div>';
+  var rows=quoteRows(groups);
+  var box=document.getElementById('cardBox');
+  var prevHidden=box.hidden; box.hidden=false;
+  var probe=document.createElement('div');
+  probe.className=listCardCls();
+  probe.style.cssText='position:absolute;left:-20000px;top:0;visibility:hidden';
+  probe.innerHTML='<div class="ltitle">酒店用品报价单</div><div class="lsub">x</div>'+
+    '<table class="ltable">'+qColgroup()+'<thead><tr><th>产品介绍</th><th>产品图片</th><th>价格</th><th>产品介绍</th><th>产品图片</th><th>价格</th></tr></thead><tbody></tbody></table><div class="lfoot">x</div>';
+  box.appendChild(probe);
+  var table=probe.querySelector('.ltable'), tbody=probe.querySelector('tbody'), thead=probe.querySelector('thead');
+  var bodyAvail=probe.clientHeight - table.offsetTop - thead.getBoundingClientRect().height - 34;
+  var html='';
+  rows.forEach(function(r){ html+=qRowHTML(r); });
+  tbody.innerHTML=html;
+  var trs=tbody.querySelectorAll('tr');
+  var pages=[],cur=[],used=0;
+  for(var i=0;i<rows.length;i++){
+    var hgt=trs[i]?Math.round(trs[i].getBoundingClientRect().height):90;
+    var nextH=(rows[i+1]&&trs[i+1])?Math.round(trs[i+1].getBoundingClientRect().height):0;
+    /* 分段小标题不单独留在页尾：连它下面的第一行一起判断 */
+    var need=(rows[i].type==='sec') ? hgt+nextH : hgt;
+    if(used+need>bodyAvail && cur.length){ pages.push(cur); cur=[]; used=0; }
+    cur.push(rows[i]); used+=hgt;
+  }
+  if(cur.length) pages.push(cur);
+  probe.parentNode && probe.parentNode.removeChild(probe);
+  box.hidden=prevHidden;
+  var out='<div class="'+listPagesCls()+'">';
+  pages.forEach(function(pg,pi){
+    var body='';
+    pg.forEach(function(r){ body+=qRowHTML(r); });
+    out+='<div class="'+listCardCls()+'" data-page="'+(pi+1)+'">'
+      +'<div class="ltitle">'+(new Date().getFullYear())+'酒店用品报价单</div>'
+      +'<div class="lsub">（TripMALL 服务市场 · 双栏比价 · '+(LIST_SIZE==='s34'?'小红书 3:4':'A4 竖版')+'）　第 '+(pi+1)+' / '+pages.length+' 页</div>'
+      +'<table class="ltable">'+qColgroup()+'<thead><tr><th>产品介绍</th><th>产品图片</th><th>价格</th><th>产品介绍</th><th>产品图片</th><th>价格</th></tr></thead><tbody>'+body+'</tbody></table>'
+      +'<div class="lfoot"><span>数据来源：携程 eBooking 服务市场（TripMALL）　价格为含税参考价</span><span>第 '+(pi+1)+' / '+pages.length+' 页</span></div></div>';
+  });
+  return out+'</div>';
+}
+
 var LIST_GROUPS=[
   ['易耗品',['牙具','梳子','剃须刀','护理包','浴帽','拖鞋','浴室凉拖','垃圾袋','客杯','香皂','儿童备品']],
   ['洗沐用品',['大瓶洗沐','小支洗沐','全套洗漱','洗手液','香氛精油']],
@@ -623,6 +727,8 @@ var LIST_ALT=3;                       // 每个小类备选数
 var LIST_SEL=null;                    // 勾选的小类
 /* 列宽合计必须 <= 卡片内宽，否则右侧会被裁掉 */
 var LIST_SIZE='a4';                                     // 'a4' | 's34'
+var LIST_BLANK_PRICE=false;                             // 社媒版：价格列留空
+function setBlankPrice(v){ LIST_BLANK_PRICE=!!v; gen(); }
 var LIST_TPL='detail';                                  // 'detail' | 'brief' | 'compare'
 var LIST_THEME='orig';                                  // orig | blue | red | green | gold | mono
 var LIST_TPL_DEF={
@@ -780,11 +886,11 @@ function listRowHTML(u,i,isBigFirst,bigSpan,isCatFirst,catSpan){
       case 'min':   h+='<td class="lc">'+esc(numOf(p.props,'最小起订量'))+'</td>'; break;
       case 'qty':   h+='<td class="lblank"></td>'; break;
       case 'unit':  h+='<td class="lc">'+esc(p.unit||'件')+'</td>'; break;
-      case 'price': h+='<td class="lprice">'+esc(p.price)+'</td>'; break;
+      case 'price': h+=LIST_BLANK_PRICE ? '<td class="lprice"></td>' : '<td class="lprice">'+esc(p.price)+'</td>'; break;
       case 'amt':   h+='<td class="lblank"></td>'; break;
       case 'days':  h+='<td class="lc">'+esc(numOf(p.props,'发货周期'))+'</td>'; break;
       case 'tier':  h+='<td class="lc ltier">'+esc(LIST_ALT_NAME[i]||'')+'</td>'; break;
-      case 'conv':  h+='<td class="lc ltier">'+esc(convPrice(p))+'</td>'; break;
+      case 'conv':  h+='<td class="lc ltier">'+esc(LIST_BLANK_PRICE?'':convPrice(p))+'</td>'; break;
     }
   }
   return h+'</tr>';
@@ -897,12 +1003,13 @@ function card(items){
   var lp=document.getElementById('listPanel');
   var sz=document.getElementById('listSize');
   var tr=document.getElementById('listTplRow');
-  if(sz){ sz.style.display = (tpl==='list'||tpl==='table') ? 'block' : 'none'; syncListBtns(); }
+  if(sz){ sz.style.display = (tpl==='list'||tpl==='table'||tpl==='quote') ? 'block' : 'none'; syncListBtns(); }
   if(tr) tr.style.display = (tpl==='list') ? 'block' : 'none';
   if(tpl==='list'){
     if(lp) lp.style.display='block';
     listUI(); return listCards();
   }
+  if(tpl==='quote'){ if(lp) lp.style.display='block'; listUI(); return quoteCard(); }
   if(lp) lp.style.display='none';
   return tpl==='red' ? redCard(items) : (tpl==='gold' ? goldCard(items) : (tpl==='table' ? tableCard(items) : whiteCard(items)));
 }
