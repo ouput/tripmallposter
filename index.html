@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>TripMALL 商品海报生成器</title>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<!-- 导出库放本地，避免 CDN 抽风导致导不出 -->
+<script src="vendor/html2canvas.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
 <style>
 body{font-family:"Microsoft YaHei",sans-serif;background:#f4f4f4;margin:0}
 .wrap{max-width:1320px;margin:20px auto;display:flex;gap:20px;padding:20px}
@@ -252,7 +254,7 @@ button.gr{background:#5a8}
     <div class="upd-detail" id="updDetail"></div>
   </div>
 </div>
-<button onclick="gen()">生成</button><button class="gr" onclick="exportPng()">导出 PNG</button>
+<button onclick="gen()">生成</button><button class="gr" onclick="exportPng()">导出 PNG</button><button class="gr" onclick="exportPdf(this)">导出 PDF</button>
 </div>
 <div class="right"><div class="upd-banner" id="updBanner"></div><div id="preview"></div></div>
 </div>
@@ -287,6 +289,7 @@ function renderMeta(){
   var t=document.getElementById('updTime'); if(!t) return;
   if(META&&META.updatedAtCN){ t.innerHTML='数据更新时间：<b>'+esc(META.updatedAtCN)+'</b>　共 '+META.totalProducts+' 个商品'; }
   else { t.innerText='数据更新时间：未知（尚未执行过更新）'; }
+  t.innerHTML += '<div style="font-size:10px;color:#aaa">'+libsStatus()+'</div>';
   var r=document.getElementById('updReport'); if(!r) return;
   if(META&&(META.newProducts||META.priceUp||META.priceDown)){
     r.innerHTML='上次更新：新增 <b>'+META.newProducts+'</b> 个 · 涨价 <b class="up">'+META.priceUp+'</b> · 降价 <b class="down">'+META.priceDown+'</b>';
@@ -729,6 +732,10 @@ var LIST_SEL=null;                    // 勾选的小类
 var LIST_SIZE='a4';                                     // 'a4' | 's34'
 var LIST_BLANK_PRICE=false;                             // 社媒版：价格列留空
 function setBlankPrice(v){ LIST_BLANK_PRICE=!!v; gen(); }
+/* 导出库自检（显示在左侧"数据更新时间"后面，便于排查） */
+function libsStatus(){
+  return 'h2c='+(typeof window.html2canvas)+' zip='+(typeof window.JSZip)+' pdf='+(typeof (window.jspdf&&window.jspdf.jsPDF));
+}
 var LIST_TPL='detail';                                  // 'detail' | 'brief' | 'compare'
 var LIST_THEME='orig';                                  // orig | blue | red | green | gold | mono
 var LIST_TPL_DEF={
@@ -1013,6 +1020,13 @@ function card(items){
   if(lp) lp.style.display='none';
   return tpl==='red' ? redCard(items) : (tpl==='gold' ? goldCard(items) : (tpl==='table' ? tableCard(items) : whiteCard(items)));
 }
+/* 导出文件名：按当前模板取名字 */
+function exportName(){
+  if(tpl==='quote') return '酒店用品报价单';
+  if(tpl==='table') return '产品规格明细表';
+  if(tpl==='list')  return listDef().name;
+  return '商品海报';
+}
 async function exportPng(){
   if(!document.getElementById('cardBox').firstElementChild) await gen();
   const box=document.getElementById('cardBox');
@@ -1026,13 +1040,13 @@ async function exportPng(){
       for(let i=0;i<pages.length;i++){
         const c=await html2canvas(pages[i],{scale:2,useCORS:true,allowTaint:false,imageTimeout:30000,backgroundColor:'#fff'});
         const blob=await new Promise(res=>c.toBlob(res,'image/png'));
-        if(blob) zip.file(listDef().name+'_'+sizeTag()+'_第'+(i+1)+'页.png', blob);
+        if(blob) zip.file(exportName()+'_'+sizeTag()+'_第'+(i+1)+'页.png', blob);
       }
       const z=await zip.generateAsync({type:'blob'});
       const a=document.createElement('a');
       a.href=URL.createObjectURL(z);
       setTimeout(function(){URL.revokeObjectURL(a.href);},8000);
-      a.download=listDef().name+'_'+sizeTag()+'_共'+pages.length+'页.zip';
+      a.download=exportName()+'_'+sizeTag()+'_共'+pages.length+'页.zip';
       a.click();
       alert('已打包导出 '+pages.length+' 张 '+(LIST_SIZE==='s34'?'3:4':'A4')+' 图片（每张 '+sizePx()+'）');
       return;
@@ -1043,13 +1057,43 @@ async function exportPng(){
       const a=document.createElement('a');
       if(blob){ a.href=URL.createObjectURL(blob); setTimeout(function(){URL.revokeObjectURL(a.href);},6000); }
       else { a.href=c.toDataURL('image/png'); }
-      a.download = pages.length>1 ? (listDef().name+'_'+sizeTag()+'_第'+(i+1)+'页.png') : 'product-card.png';
+      a.download = pages.length>1 ? (exportName()+'_'+sizeTag()+'_第'+(i+1)+'页.png') : 'product-card.png';
       a.click();
       if(pages.length>1) await new Promise(r=>setTimeout(r,900));
     }
     if(pages.length>1) alert('已导出 '+pages.length+' 张 '+(LIST_SIZE==='s34'?'3:4':'A4')+' 图片（每张 '+sizePx()+'）');
   } catch(e){ alert('导出失败：'+e.message); }
   finally{ box.hidden=prev; }
+}
+
+/* 导出 PDF：采购清单 / 报价单 / 表格模式，一页一张，A4 或 3:4 */
+async function exportPdf(btn){
+  const box=document.getElementById('cardBox');
+  if(!box.firstElementChild) await gen();
+  if(typeof window.jspdf==='undefined'){ alert('PDF 组件没加载成功（需要联网加载 jspdf），请刷新页面再试'); return; }
+  const prev=box.hidden; box.hidden=false;
+  const oldTxt=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='导出中…'; }
+  try{
+    await new Promise(r=>setTimeout(r,80));
+    const root=box.firstElementChild;
+    const pages=(root&&root.classList.contains('lpages'))?Array.prototype.slice.call(root.querySelectorAll('.lcard')):[root];
+    const jsPDF=window.jspdf.jsPDF;
+    const is34=(LIST_SIZE==='s34');
+    const pw=is34?180:210, ph=is34?240:297;          // 3:4 → 180×240mm；A4 → 210×297mm
+    let doc=null;
+    for(let i=0;i<pages.length;i++){
+      if(btn) btn.textContent='导出中 '+(i+1)+'/'+pages.length;
+      const c=await html2canvas(pages[i],{scale:2,useCORS:true,allowTaint:false,imageTimeout:30000,backgroundColor:'#fff'});
+      const img=c.toDataURL('image/jpeg',0.92);
+      if(!doc) doc=new jsPDF({orientation:'portrait',unit:'mm',format:[pw,ph],compress:true});
+      else doc.addPage([pw,ph]);
+      doc.addImage(img,'JPEG',0,0,pw,ph,undefined,'FAST');
+    }
+    doc.save(exportName()+'_'+sizeTag()+'_共'+pages.length+'页.pdf');
+    alert('已导出 PDF：'+pages.length+' 页（'+(is34?'3:4 180×240mm':'A4 210×297mm')+'）');
+  } catch(e){ alert('导出 PDF 失败：'+e.message); }
+  finally{ box.hidden=prev; if(btn){ btn.disabled=false; btn.textContent=oldTxt||'导出 PDF'; } }
 }
 loadData();
 </script>
