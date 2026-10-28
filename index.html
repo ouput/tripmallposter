@@ -208,6 +208,18 @@ button.gr{background:#5a8}
 .tcard{position:relative}
 
 
+/* ===== 报价单模式（品牌/品名型号/产品参数/产品图片/价格） ===== */
+.detail-quote-pages .qbrand{text-align:center;font-weight:700;font-size:14px}
+.detail-quote-pages .qname{font-weight:700;font-size:14.5px;color:#111}
+.detail-quote-pages .qparams{font-size:13px;color:#444;line-height:1.35}
+.detail-quote-pages .qcat{text-align:center;font-weight:700;font-size:14px;background:var(--smallbg)}
+.detail-quote-pages .qimg{text-align:center;padding:0}
+.detail-quote-pages .qimg img{max-width:100%;max-height:70px;object-fit:contain;display:block;margin:0 auto}
+.detail-quote-pages .qprice{text-align:center;color:var(--accent);font-weight:800;font-size:15px;white-space:nowrap}
+.detail-quote-pages .lcard.s34 .qimg img{max-height:74px}
+.detail-quote-pages .lcard.s34 .qname{font-size:15px}
+.detail-quote-pages .lcard.s34 .qparams{font-size:13.5px}
+
 </style>
 </head>
 <body>
@@ -216,7 +228,7 @@ button.gr{background:#5a8}
 <p class="hint" id="hint">每行一个商品ID（空格/换行分隔）。从后台商品库取名称/价格/主图/多标签，按所选模板出图。</p>
 <label>海报模板</label>
 <div class="mode"><button class="on" id="tb-white" onclick="setTpl('white')">白底模板</button><button id="tb-red" onclick="setTpl('red')">红色大促</button><button id="tb-gold" onclick="setTpl('gold')">金色推荐</button><button id="tb-table" onclick="setTpl('table')">表格模式</button><button id="tb-list" onclick="setTpl('list')">采购清单</button></div>
-<div class="mode" style="margin-top:6px"><button id="tb-quote" onclick="setTpl('quote')">报价单（双栏比价）</button></div>
+<div class="mode" style="margin-top:6px"><button id="tb-quote" onclick="setTpl('quote')">报价单（双栏比价）</button><button id="tb-quote-detail" onclick="setTpl('quote-detail')">报价单（明细表）</button></div>
 <div id="listSize" style="display:none">
   <div id="listTplRow">
     <label>清单类型</label>
@@ -241,6 +253,7 @@ button.gr{background:#5a8}
 <div class="edithint">标签用逗号分隔，如：经济实惠,客房标配</div>
 <div id="editArea"></div>
 <div id="listPanel" style="display:none"></div>
+<div id="detailQuotePanel" style="display:none"></div>
 <button style="margin-top:6px;background:#5a8" onclick="saveSnap()">保存本轮编辑</button><button style="margin-top:6px;margin-left:4px" onclick="renderHistory()">查看保存记录</button>
 <div id="histArea"></div>
 <div class="upd-wrap">
@@ -260,7 +273,7 @@ button.gr{background:#5a8}
 </div>
 <div id="cardBox" hidden></div>
 <script>
-let mode='grid', tpl='white', DATA={}, SPECS={}, edits={}, idsKey='', WM=false;
+let mode='grid', tpl='white', DATA={}, SPECS={}, MARKET_CATEGORIES=null, edits={}, idsKey='', WM=false;
 function wmHTML(w,h){
   const text='携程服务市场 TripMALL', stepX=330, stepY=190;
   let out='';
@@ -280,6 +293,7 @@ function delSnap(i){ try{ const s=JSON.parse(localStorage.getItem('tme_saved')||
 async function loadData(bust){ const q=bust?('?v='+Date.now()):'?v=4';
   try{ DATA = await fetch('data/products.json'+q).then(r=>r.json()); }catch(e){ DATA={}; }
   try{ SPECS = await fetch('data/specs.json'+(bust?('?v='+Date.now()):'?v=1')).then(r=>r.json()); }catch(e){ SPECS={}; }
+  try{ MARKET_CATEGORIES = await fetch('data/market-categories.json'+(bust?('?v='+Date.now()):'?v=1')).then(r=>r.json()); }catch(e){ MARKET_CATEGORIES=null; }
   const n=Object.keys(DATA).length, m=Object.keys(SPECS).length;
   document.getElementById('hint').innerText = '已加载商品 '+n+' 个'+(m?('，规格库 '+m+' 个'):'（规格库未加载）')+'。每行填一个商品ID。'; gen(); loadMeta(); }
 /* ===== 数据更新：时间 / 报表 / 检查更新（轮询本机 8790 端口） ===== */
@@ -327,7 +341,7 @@ async function pollProgress(){
   }
 }
 async function reloadData(){ await loadData(true); await loadMeta(); alert('数据已刷新'); }
-function setTpl(t){tpl=t;['white','red','gold','table','list','quote'].forEach(function(k){var b=document.getElementById('tb-'+k); if(b) b.classList.toggle('on',t===k);});gen();}
+function setTpl(t){tpl=t;['white','red','gold','table','list','quote','quote-detail'].forEach(function(k){var b=document.getElementById('tb-'+k); if(b) b.classList.toggle('on',t===k);});gen();}
 function setMode(m){mode=m;document.getElementById('mb-grid').classList.toggle('on',m==='grid');document.getElementById('mb-single').classList.toggle('on',m==='single');gen();}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var UNIT_WORDS=['件','个','只','支','条','套','瓶','包','袋','盒','箱','桶','张','台','把','块','片','组','份','卷','米','公斤','对','副','听','罐','床','捆','扎','双','顶','扇','盏','匹','部','艘','辆','间','位','次','天','平方','平方米','码','磅'];
@@ -393,6 +407,13 @@ function buildEditors(ids){
 async function gen(){
   const ids=document.getElementById('ids').value.trim().split(/\s+/).filter(Boolean);
   const area=document.getElementById('editArea');
+  if(tpl==='quote-detail'){
+    if(area) area.innerHTML='';
+    idsKey='';
+    const box=document.getElementById('cardBox'); box.innerHTML=card([]);
+    const pv=document.getElementById('preview'); pv.innerHTML=''; if(box.firstElementChild) pv.appendChild(box.firstElementChild.cloneNode(true));
+    return;
+  }
   if(!ids.length){ if(area) area.innerHTML=''; return; }
   const key=ids.join(',');
   if(key!==idsKey){ idsKey=key; buildEditors(ids); }
@@ -1006,22 +1027,201 @@ function listUI(){
   });
   el.innerHTML=h;
 }
+/* ===================== 报价单模式（类目/品牌/品名型号/产品参数/产品图片/价格） ===================== */
+var DETAIL_QUOTE_SEL=null;
+var DETAIL_QUOTE_HEADS=['类目','品牌','品名型号','产品参数','产品图片','价格（含税票）'];
+var DETAIL_QUOTE_COLS_A4=[90,110,230,460,140,174];      // 合计 1204
+var DETAIL_QUOTE_COLS_S34=[78,95,200,400,122,149];      // 合计 1044
+function detailQuoteTree(){
+  var tree={};
+  if(MARKET_CATEGORIES&&Array.isArray(MARKET_CATEGORIES.tree)){
+    MARKET_CATEGORIES.tree.forEach(function(l1){
+      tree[l1.name]=tree[l1.name]||{};
+      (l1.second||[]).forEach(function(l2){
+        tree[l1.name][l2.name]=tree[l1.name][l2.name]||{};
+        (l2.third||[]).forEach(function(l3){ tree[l1.name][l2.name][l3.name+'\u0002'+l3.id]=[]; });
+      });
+    });
+  } else {
+    Object.keys(SPECS).forEach(function(id){
+      var c=(SPECS[id]&&SPECS[id].c)||[]; if(c.length<3) return;
+      tree[c[0]]=tree[c[0]]||{}; tree[c[0]][c[1]]=tree[c[0]][c[1]]||{};
+      tree[c[0]][c[1]][c[2]+'\u0002'+c[2]]=[];
+    });
+  }
+  Object.keys(SPECS).forEach(function(id){
+    var c=(SPECS[id]&&SPECS[id].c)||[]; if(c.length<3) return;
+    var l1=c[0],l2=c[1],l3=c[2];
+    if(MARKET_CATEGORIES&&l1==='酒店布草') l1='布草床垫';
+    if(MARKET_CATEGORIES&&c[0]==='酒店布草'&&c[1]==='巾垫类'&&c[2]==='床垫'){ l2='床垫'; l3='弹簧床垫'; }
+    if(!tree[l1]||!tree[l1][l2]) return;
+    var leaf=Object.keys(tree[l1][l2]).filter(function(k){ return k.slice(0,k.indexOf('\u0002'))===l3; })[0];
+    if(leaf) tree[l1][l2][leaf].push(id);
+  });
+  return tree;
+}
+function detailQuoteKey(l1,l2,l3){ return encodeURIComponent(l1)+'|'+encodeURIComponent(l2)+'|'+encodeURIComponent(l3); }
+function detailQuoteInitSel(){ if(!DETAIL_QUOTE_SEL) DETAIL_QUOTE_SEL={}; }
+function detailQuoteUI(){
+  var el=document.getElementById('detailQuotePanel'); if(!el) return;
+  detailQuoteInitSel();
+  if(el.getAttribute('data-shown')==='1') return;
+  el.setAttribute('data-shown','1');
+  var tree=detailQuoteTree(), l1cnt={}, l2cnt={};
+  Object.keys(tree).forEach(function(l1){ l1cnt[l1]=0; Object.keys(tree[l1]).forEach(function(l2){ l2cnt[l1+'\u0001'+l2]=0; Object.keys(tree[l1][l2]).forEach(function(l3){ var n=tree[l1][l2][l3].length; l1cnt[l1]+=n; l2cnt[l1+'\u0001'+l2]+=n; }); }); });
+  var h='';
+  h+='<div class="edithint">勾选要放进报价单的明细类目（服务市场全部分类，共 '+Object.keys(tree).length+' 大类）</div>';
+  h+='<div style="margin:4px 0"><button type="button" onclick="detailQuoteSetAll(true)">全选类目</button><button type="button" onclick="detailQuoteSetAll(false)">清空选择</button></div>';
+  Object.keys(tree).sort(function(a,b){return l1cnt[b]-l1cnt[a];}).forEach(function(l1){
+    h+='<div style="margin:6px 0 2px"><b style="font-size:12.5px;color:#c05a00">'+esc(l1)+' <span style="color:#bbb;font-weight:400">'+l1cnt[l1]+'</span></b></div>';
+    Object.keys(tree[l1]).sort(function(a,b){return l2cnt[l1+'\u0001'+b]-l2cnt[l1+'\u0001'+a];}).forEach(function(l2){
+      h+='<div style="margin:2px 0 2px 10px"><span style="font-size:11.5px;color:#999">'+esc(l2)+'</span>';
+      Object.keys(tree[l1][l2]).sort(function(a,b){return tree[l1][l2][b].length-tree[l1][l2][a].length;}).forEach(function(l3){
+        var key=detailQuoteKey(l1,l2,l3), leafName=l3.split('\u0002')[0];
+        h+='<label style="display:inline-block;font-size:12px;margin:0 6px 0 0;font-weight:400;cursor:pointer"><input type="checkbox" style="width:auto;margin:0 2px 0 0" '+(DETAIL_QUOTE_SEL[key]?'checked':'')+' onchange="DETAIL_QUOTE_SEL[\''+key+'\']=this.checked;gen()">'+esc(leafName)+'<span style="color:#bbb">('+tree[l1][l2][l3].length+')</span></label>';
+      });
+      h+='</div>';
+    });
+  });
+  el.innerHTML=h;
+}
+function detailQuoteSetAll(on){
+  var tree=detailQuoteTree(); DETAIL_QUOTE_SEL={};
+  Object.keys(tree).forEach(function(l1){ Object.keys(tree[l1]).forEach(function(l2){ Object.keys(tree[l1][l2]).forEach(function(l3){ if(on) DETAIL_QUOTE_SEL[detailQuoteKey(l1,l2,l3)]=true; }); }); });
+  var el=document.getElementById('detailQuotePanel'); if(el) el.removeAttribute('data-shown');
+  gen();
+}
+function detailQuoteBrand(props){ return propOf(props,'品牌'); }
+function detailQuoteParams(props){
+  var out=[];
+  (props||[]).forEach(function(kv){
+    if(!kv[0]||!kv[1]) return;
+    if(kv[0]==='品牌') return;
+    if(LIST_STD_SKIP.test(kv[0])) return;
+    if(!LIST_STD_KEEP.test(kv[0])) return;
+    if(out.length>=5) return;
+    out.push(kv[0]+'：'+String(kv[1]).replace(/\s+/g,' '));
+  });
+  var s=out.join('；'); return s.length>180?s.slice(0,177)+'…':s;
+}
+function detailQuoteRows(){
+  detailQuoteInitSel();
+  var tree=detailQuoteTree(), groups=[];
+  Object.keys(tree).forEach(function(l1){
+    var cats=[];
+    Object.keys(tree[l1]).forEach(function(l2){
+      Object.keys(tree[l1][l2]).forEach(function(l3){
+        var key=detailQuoteKey(l1,l2,l3);
+        if(!DETAIL_QUOTE_SEL[key]) return;
+        var items=[];
+        tree[l1][l2][l3].forEach(function(id){
+          var r=DATA[id]||{}, sp=SPECS[id]||{};
+          if(!r.image) return;
+          var price=parseFloat(r.price)||0;
+          if(!(price>0)) return;
+          items.push({id:id,name:r.name||('商品'+id),price:r.price,unit:unitOf(id,r.name,edits[id]),brand:detailQuoteBrand(sp.p||[]),model:propOf(sp.p||[],'型号'),params:detailQuoteParams(sp.p||[]),img:r.image});
+        });
+        if(!items.length) return;
+        items.sort(function(a,b){return (parseFloat(a.price)||0)-(parseFloat(b.price)||0);});
+        cats.push({cat:l3.split('\u0002')[0],items:items});
+      });
+    });
+    if(cats.length) groups.push({big:l1,cats:cats});
+  });
+  return groups;
+}
+function detailQuoteCols(){ return LIST_SIZE==='s34'?DETAIL_QUOTE_COLS_S34:DETAIL_QUOTE_COLS_A4; }
+function detailQuoteColgroup(){ var C=detailQuoteCols(),h=''; for(var i=0;i<C.length;i++)h+='<col style="width:'+C[i]+'px">'; return '<colgroup>'+h+'</colgroup>'; }
+function detailQuoteThead(){ var C=detailQuoteCols(),h=''; for(var i=0;i<DETAIL_QUOTE_HEADS.length;i++)h+='<th style="width:'+C[i]+'px">'+DETAIL_QUOTE_HEADS[i]+'</th>'; return '<thead><tr>'+h+'</tr></thead>'; }
+function detailQuoteRowHTML(c,item,i,isCatFirst,catSpan){
+  var h='<tr>';
+  if(isCatFirst) h+='<td class="qcat" rowspan="'+catSpan+'">'+esc(c.cat)+'</td>';
+  h+='<td class="qbrand">'+(item.brand?esc(item.brand):'')+'</td>';
+  h+='<td class="qname">'+esc(item.name)+(item.model?'<div style="font-weight:400;font-size:12px;color:#888">'+esc(item.model)+'</div>':'')+'</td>';
+  h+='<td class="qparams">'+esc(item.params)+'</td>';
+  h+='<td class="qimg">'+(item.img?'<img src="'+item.img+'" crossorigin="anonymous">':'')+'</td>';
+  h+='<td class="qprice">'+(LIST_BLANK_PRICE?'':esc(item.price)+'元/'+esc(item.unit))+'</td>';
+  return h+'</tr>';
+}
+function detailQuotePageHTML(pg,pi,total){
+  var body='';
+  pg.forEach(function(c){
+    c.items.forEach(function(item,i){ body+=detailQuoteRowHTML(c,item,i,i===0,c.items.length); });
+  });
+  var h='<div class="'+listCardCls()+'" data-page="'+(pi+1)+'">';
+  h+='<div class="ltitle">携程服务市场 · '+esc(pg[0].big)+'报价单</div>';
+  h+='<div class="lsub">（TripMALL 服务市场 · 明细类目报价'+(LIST_BLANK_PRICE?' · 不含价格':'')+' · '+(LIST_SIZE==='s34'?'小红书 3:4':'A4 竖版')+'）　第 '+(pi+1)+' / '+total+' 页</div>';
+  h+='<table class="ltable">'+detailQuoteColgroup()+detailQuoteThead()+'<tbody>'+body+'</tbody></table>';
+  h+='<div class="lfoot"><span>数据来源：携程服务市场（TripMALL）</span><span>第 '+(pi+1)+' / '+total+' 页</span></div>';
+  return h+'</div>';
+}
+function detailQuoteCards(){
+  var groups=detailQuoteRows();
+  var empty='<div class="lpages"><div class="lcard"><div class="ltitle">携程服务市场 · 报价单</div><div class="lsub">没有可用的商品数据（请勾选类目）</div></div></div>';
+  if(!groups.length) return empty;
+  var box=document.getElementById('cardBox');
+  var prevHidden=box.hidden; box.hidden=false;
+  var probe=document.createElement('div');
+  probe.className=listCardCls();
+  probe.style.cssText='position:absolute;left:-20000px;top:0;visibility:hidden';
+  probe.innerHTML='<div class="ltitle">x</div><div class="lsub">x</div><table class="ltable">'+detailQuoteColgroup()+detailQuoteThead()+'<tbody></tbody></table><div class="lfoot">x</div>';
+  box.appendChild(probe);
+  var table=probe.querySelector('.ltable'), tbody=probe.querySelector('tbody'), thead=probe.querySelector('thead');
+  var bodyAvail=probe.clientHeight - table.offsetTop - thead.getBoundingClientRect().height - 34;
+  var html='';
+  groups.forEach(function(g){ g.cats.forEach(function(c){ c.items.forEach(function(item){ html+=detailQuoteRowHTML(c,item,0,true,1); }); }); });
+  tbody.innerHTML=html;
+  var trs=tbody.querySelectorAll('tr'), idx=0;
+  groups.forEach(function(g){ g.cats.forEach(function(c){ c.hs=[]; c.items.forEach(function(){ var tr=trs[idx++]; c.hs.push(tr?Math.round(tr.getBoundingClientRect().height):80); }); }); });
+  probe.parentNode && probe.parentNode.removeChild(probe);
+  box.hidden=prevHidden;
+  var pages=[],cur=[],used=0;
+  function flushQuotePage(){ if(cur.length){ pages.push(cur); cur=[]; used=0; } }
+  groups.forEach(function(g){
+    flushQuotePage();
+    g.cats.forEach(function(c){
+      var pos=0;
+      while(pos<c.items.length){
+        var chunk=[],chunkH=0;
+        while(pos<c.items.length){
+          var rh=c.hs[pos]||80;
+          if(used+chunkH+rh>bodyAvail && chunk.length) break;
+          if(used+chunkH+rh>bodyAvail && !chunk.length && cur.length) break;
+          chunk.push(c.items[pos]); chunkH+=rh; pos++;
+          if(used+chunkH>=bodyAvail) break;
+        }
+        if(!chunk.length){ flushQuotePage(); continue; }
+        cur.push({big:g.big,cat:c.cat,items:chunk}); used+=chunkH;
+        if(pos<c.items.length) flushQuotePage();
+      }
+    });
+    flushQuotePage();
+  });
+  var out='<div class="'+listPagesCls()+' detail-quote-pages">';
+  pages.forEach(function(pg,pi){ out+=detailQuotePageHTML(pg,pi,pages.length); });
+  return out+'</div>';
+}
+
 function card(items){
   var lp=document.getElementById('listPanel');
+  var dqp=document.getElementById('detailQuotePanel');
+  if(dqp) dqp.style.display=(tpl==='quote-detail')?'block':'none';
   var sz=document.getElementById('listSize');
   var tr=document.getElementById('listTplRow');
-  if(sz){ sz.style.display = (tpl==='list'||tpl==='table'||tpl==='quote') ? 'block' : 'none'; syncListBtns(); }
+  if(sz){ sz.style.display = (tpl==='list'||tpl==='table'||tpl==='quote'||tpl==='quote-detail') ? 'block' : 'none'; syncListBtns(); }
   if(tr) tr.style.display = (tpl==='list') ? 'block' : 'none';
   if(tpl==='list'){
     if(lp) lp.style.display='block';
     listUI(); return listCards();
   }
+  if(tpl==='quote-detail'){ if(lp) lp.style.display='none'; detailQuoteUI(); return detailQuoteCards(); }
   if(tpl==='quote'){ if(lp) lp.style.display='block'; listUI(); return quoteCard(); }
   if(lp) lp.style.display='none';
   return tpl==='red' ? redCard(items) : (tpl==='gold' ? goldCard(items) : (tpl==='table' ? tableCard(items) : whiteCard(items)));
 }
 /* 导出文件名：按当前模板取名字 */
 function exportName(){
+  if(tpl==='quote-detail') return '携程服务市场报价单明细表';
   if(tpl==='quote') return '酒店用品报价单';
   if(tpl==='table') return '产品规格明细表';
   if(tpl==='list')  return listDef().name;
