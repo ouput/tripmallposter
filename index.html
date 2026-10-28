@@ -219,6 +219,19 @@ button.gr{background:#5a8}
 .detail-quote-pages .lcard.s34 .qimg img{max-height:74px}
 .detail-quote-pages .lcard.s34 .qname{font-size:15px}
 .detail-quote-pages .lcard.s34 .qparams{font-size:13.5px}
+#detailQuotePanel .dq-level{margin-top:14px}
+#detailQuotePanel .dq-options{display:flex;flex-wrap:wrap;gap:6px}
+#detailQuotePanel .dq-nav{margin:0;padding:7px 10px;background:#f3f5f7;color:#333;border:1px solid #dfe3e8;font-size:12px}
+#detailQuotePanel .dq-nav.on{background:#e08a00;border-color:#e08a00;color:#fff}
+#detailQuotePanel .dq-nav span{margin-left:4px;font-size:10px}
+#detailQuotePanel .dq-leaf{display:flex;align-items:center;gap:4px;margin:0;padding:6px 8px;border:1px solid #e2e5e9;border-radius:5px;font-size:12px;font-weight:400;cursor:pointer}
+#detailQuotePanel .dq-leaf input{width:auto;margin:0}
+#detailQuotePanel .dq-leaf span{color:#999;font-size:10px}
+#detailQuotePanel .dq-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#detailQuotePanel .dq-actions button{margin:0;padding:6px 9px;font-size:12px}
+#detailQuotePanel .dq-summary{margin-top:14px;padding-top:10px;border-top:1px solid #eee}
+#detailQuotePanel .dq-selected{display:flex;flex-wrap:wrap;gap:5px;max-height:160px;overflow:auto}
+#detailQuotePanel .dq-chip{margin:0;padding:5px 8px;background:#eef5fc;color:#24619a;border:1px solid #d5e5f5;font-size:11px}
 
 </style>
 </head>
@@ -1029,6 +1042,7 @@ function listUI(){
 }
 /* ===================== 报价单模式（类目/品牌/品名型号/产品参数/产品图片/价格） ===================== */
 var DETAIL_QUOTE_SEL=null;
+var DETAIL_QUOTE_L1='', DETAIL_QUOTE_L2='';
 var DETAIL_QUOTE_HEADS=['类目','品牌','品名型号','产品参数','产品图片','价格（含税票）'];
 var DETAIL_QUOTE_COLS_A4=[90,110,230,460,140,174];      // 合计 1204
 var DETAIL_QUOTE_COLS_S34=[78,95,200,400,122,149];      // 合计 1044
@@ -1065,30 +1079,91 @@ function detailQuoteInitSel(){ if(!DETAIL_QUOTE_SEL) DETAIL_QUOTE_SEL={}; }
 function detailQuoteUI(){
   var el=document.getElementById('detailQuotePanel'); if(!el) return;
   detailQuoteInitSel();
-  if(el.getAttribute('data-shown')==='1') return;
-  el.setAttribute('data-shown','1');
-  var tree=detailQuoteTree(), l1cnt={}, l2cnt={};
-  Object.keys(tree).forEach(function(l1){ l1cnt[l1]=0; Object.keys(tree[l1]).forEach(function(l2){ l2cnt[l1+'\u0001'+l2]=0; Object.keys(tree[l1][l2]).forEach(function(l3){ var n=tree[l1][l2][l3].length; l1cnt[l1]+=n; l2cnt[l1+'\u0001'+l2]+=n; }); }); });
-  var h='';
-  h+='<div class="edithint">勾选要放进报价单的明细类目（服务市场全部分类，共 '+Object.keys(tree).length+' 大类）</div>';
-  h+='<div style="margin:4px 0"><button type="button" onclick="detailQuoteSetAll(true)">全选类目</button><button type="button" onclick="detailQuoteSetAll(false)">清空选择</button></div>';
-  Object.keys(tree).sort(function(a,b){return l1cnt[b]-l1cnt[a];}).forEach(function(l1){
-    h+='<div style="margin:6px 0 2px"><b style="font-size:12.5px;color:#c05a00">'+esc(l1)+' <span style="color:#bbb;font-weight:400">'+l1cnt[l1]+'</span></b></div>';
-    Object.keys(tree[l1]).sort(function(a,b){return l2cnt[l1+'\u0001'+b]-l2cnt[l1+'\u0001'+a];}).forEach(function(l2){
-      h+='<div style="margin:2px 0 2px 10px"><span style="font-size:11.5px;color:#999">'+esc(l2)+'</span>';
-      Object.keys(tree[l1][l2]).sort(function(a,b){return tree[l1][l2][b].length-tree[l1][l2][a].length;}).forEach(function(l3){
-        var key=detailQuoteKey(l1,l2,l3), leafName=l3.split('\u0002')[0];
-        h+='<label style="display:inline-block;font-size:12px;margin:0 6px 0 0;font-weight:400;cursor:pointer"><input type="checkbox" style="width:auto;margin:0 2px 0 0" '+(DETAIL_QUOTE_SEL[key]?'checked':'')+' onchange="DETAIL_QUOTE_SEL[\''+key+'\']=this.checked;gen()">'+esc(leafName)+'<span style="color:#bbb">('+tree[l1][l2][l3].length+')</span></label>';
+  var tree=detailQuoteTree(), selected=[], l1sel={}, l2sel={};
+  Object.keys(tree).forEach(function(l1){
+    l1sel[l1]=0;
+    Object.keys(tree[l1]).forEach(function(l2){
+      var path=detailQuoteKey(l1,l2,''); l2sel[path]=0;
+      Object.keys(tree[l1][l2]).forEach(function(l3){
+        var key=detailQuoteKey(l1,l2,l3);
+        if(DETAIL_QUOTE_SEL[key]){
+          selected.push({key:key,l1:l1,l2:l2,name:l3.split('\u0002')[0]});
+          l1sel[l1]++; l2sel[path]++;
+        }
       });
-      h+='</div>';
     });
   });
+  if(!tree[DETAIL_QUOTE_L1]){ DETAIL_QUOTE_L1=''; DETAIL_QUOTE_L2=''; }
+  var seconds=tree[DETAIL_QUOTE_L1];
+  if(!seconds||!seconds[DETAIL_QUOTE_L2]) DETAIL_QUOTE_L2='';
+  var h='<div class="edithint">依次选择一级分类、二级分类，再勾选三级分类加入报价单。切换分类不会清除已选项。</div>';
+  h+='<div class="dq-level" data-dq-level="1"><label>一级分类</label><div class="dq-options">';
+  Object.keys(tree).forEach(function(l1){
+    h+='<button type="button" class="dq-nav'+(DETAIL_QUOTE_L1===l1?' on':'')+'" data-dq-action="first" data-dq-value="'+esc(l1)+'" aria-pressed="'+(DETAIL_QUOTE_L1===l1)+'">'+esc(l1)+(l1sel[l1]?'<span>已选 '+l1sel[l1]+'</span>':'')+'</button>';
+  });
+  h+='</div></div>';
+  if(seconds){
+    h+='<div class="dq-level" data-dq-level="2"><label>二级分类 · '+esc(DETAIL_QUOTE_L1)+'</label><div class="dq-options">';
+    Object.keys(seconds).forEach(function(l2){
+      var count=l2sel[detailQuoteKey(DETAIL_QUOTE_L1,l2,'')];
+      h+='<button type="button" class="dq-nav'+(DETAIL_QUOTE_L2===l2?' on':'')+'" data-dq-action="second" data-dq-value="'+esc(l2)+'" aria-pressed="'+(DETAIL_QUOTE_L2===l2)+'">'+esc(l2)+(count?'<span>已选 '+count+'</span>':'')+'</button>';
+    });
+    h+='</div></div>';
+  }
+  var thirds=seconds&&seconds[DETAIL_QUOTE_L2];
+  if(thirds){
+    h+='<div class="dq-level" data-dq-level="3"><label>三级分类 · '+esc(DETAIL_QUOTE_L2)+'</label><div class="dq-options">';
+    Object.keys(thirds).forEach(function(l3){
+      var key=detailQuoteKey(DETAIL_QUOTE_L1,DETAIL_QUOTE_L2,l3);
+      h+='<label class="dq-leaf"><input type="checkbox" data-dq-key="'+esc(key)+'" '+(DETAIL_QUOTE_SEL[key]?'checked':'')+'>'+esc(l3.split('\u0002')[0])+'<span>('+thirds[l3].length+')</span></label>';
+    });
+    h+='</div><div class="dq-actions"><button type="button" data-dq-action="select-current">全选当前二级</button><button type="button" data-dq-action="clear-current">清空当前二级</button></div></div>';
+  }
+  h+='<div class="dq-summary"><label>已选三级分类（'+selected.length+'）</label>';
+  if(selected.length){
+    h+='<div class="dq-selected">';
+    selected.forEach(function(s){
+      var path=s.l1+' / '+s.l2+' / '+s.name;
+      h+='<button type="button" class="dq-chip" data-dq-action="remove" data-dq-key="'+esc(s.key)+'" title="'+esc(path)+'" aria-label="'+esc('移除 '+path)+'">'+esc(s.l2+' · '+s.name)+' ×</button>';
+    });
+    h+='</div><div class="dq-actions"><button type="button" data-dq-action="clear-all">清空全部已选</button></div>';
+  } else {
+    h+='<div class="edithint">尚未选择明细类目。'+(DETAIL_QUOTE_L1?'请选择'+(DETAIL_QUOTE_L2?'三级分类。':'二级分类。'):'请先选择一级分类。')+'</div>';
+  }
+  h+='</div>';
   el.innerHTML=h;
+  el.onclick=function(e){
+    var b=e.target.closest('button[data-dq-action]'); if(!b||!el.contains(b)) return;
+    var action=b.getAttribute('data-dq-action'), value=b.getAttribute('data-dq-value');
+    if(action==='first'){
+      if(DETAIL_QUOTE_L1!==value){ DETAIL_QUOTE_L1=value; DETAIL_QUOTE_L2=''; }
+      detailQuoteUI();
+    } else if(action==='second'){
+      DETAIL_QUOTE_L2=value; detailQuoteUI();
+    } else if(action==='select-current'||action==='clear-current'){
+      detailQuoteSetAll(action==='select-current');
+    } else if(action==='remove'){
+      delete DETAIL_QUOTE_SEL[b.getAttribute('data-dq-key')]; gen();
+    } else if(action==='clear-all'){
+      DETAIL_QUOTE_SEL={}; gen();
+    }
+  };
+  el.onchange=function(e){
+    var key=e.target.getAttribute('data-dq-key'); if(!key||e.target.type!=='checkbox') return;
+    if(e.target.checked) DETAIL_QUOTE_SEL[key]=true;
+    else delete DETAIL_QUOTE_SEL[key];
+    gen();
+  };
 }
 function detailQuoteSetAll(on){
-  var tree=detailQuoteTree(); DETAIL_QUOTE_SEL={};
-  Object.keys(tree).forEach(function(l1){ Object.keys(tree[l1]).forEach(function(l2){ Object.keys(tree[l1][l2]).forEach(function(l3){ if(on) DETAIL_QUOTE_SEL[detailQuoteKey(l1,l2,l3)]=true; }); }); });
-  var el=document.getElementById('detailQuotePanel'); if(el) el.removeAttribute('data-shown');
+  var tree=detailQuoteTree(), thirds=tree[DETAIL_QUOTE_L1]&&tree[DETAIL_QUOTE_L1][DETAIL_QUOTE_L2];
+  if(!thirds) return;
+  detailQuoteInitSel();
+  Object.keys(thirds).forEach(function(l3){
+    var key=detailQuoteKey(DETAIL_QUOTE_L1,DETAIL_QUOTE_L2,l3);
+    if(on) DETAIL_QUOTE_SEL[key]=true;
+    else delete DETAIL_QUOTE_SEL[key];
+  });
   gen();
 }
 function detailQuoteBrand(props){ return propOf(props,'品牌'); }
