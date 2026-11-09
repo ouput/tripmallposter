@@ -233,6 +233,52 @@ button.gr{background:#5a8}
 #detailQuotePanel .dq-selected{display:flex;flex-wrap:wrap;gap:5px;max-height:160px;overflow:auto}
 #detailQuotePanel .dq-chip{margin:0;padding:5px 8px;background:#eef5fc;color:#24619a;border:1px solid #d5e5f5;font-size:11px}
 
+/* ===== 酒店开业配置清单 ===== */
+#openListPanel .ol-help{font-size:11px;color:#888;line-height:1.55;margin:6px 0}
+#openListPanel .ol-fields{display:grid;grid-template-columns:1fr;gap:6px}
+#openListPanel .ol-fields label{margin:7px 0 2px}
+#openListPanel .ol-fields input,#openListPanel .ol-fields select{width:100%;box-sizing:border-box;padding:7px;border:1px solid #ccc;border-radius:5px;font-size:12px}
+#openListPanel .ol-row-editor{border-top:1px dashed #eee;padding:7px 0}
+#openListPanel .ol-row-name{font-size:11px;font-weight:700;color:#444;line-height:1.45;word-break:break-all}
+#openListPanel .ol-row-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+#openListPanel .ol-row-fields label{margin:0;font-size:10px;color:#888;font-weight:400}
+#openListPanel .ol-row-fields input,#openListPanel .ol-row-fields textarea{width:100%;box-sizing:border-box;padding:5px;border:1px solid #ddd;border-radius:4px;font-size:11px}
+#openListPanel .ol-row-fields textarea{height:48px;resize:vertical;font-family:inherit}
+#openListPanel .ol-save-state{font-size:11px;color:#5a8;margin:6px 0}
+#openListPanel .dq-level{margin-top:10px}
+#openListPanel .dq-options{display:flex;flex-wrap:wrap;gap:6px}
+#openListPanel .dq-nav{margin:0;padding:7px 10px;background:#f3f5f7;color:#333;border:1px solid #dfe3e8;font-size:12px}
+#openListPanel .dq-nav.on{background:#e08a00;border-color:#e08a00;color:#fff}
+#openListPanel .dq-nav span{margin-left:4px;font-size:10px}
+#openListPanel .dq-leaf{display:flex;align-items:center;gap:4px;margin:0;padding:6px 8px;border:1px solid #e2e5e9;border-radius:5px;font-size:12px;font-weight:400;cursor:pointer}
+#openListPanel .dq-leaf input{width:auto;margin:0}
+#openListPanel .dq-leaf span{color:#999;font-size:10px}
+#openListPanel .dq-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#openListPanel .dq-actions button{margin:0;padding:6px 9px;font-size:12px}
+#openListPanel .dq-summary{margin-top:14px;padding-top:10px;border-top:1px solid #eee}
+#openListPanel .dq-selected{display:flex;flex-wrap:wrap;gap:5px;max-height:160px;overflow:auto}
+#openListPanel .dq-chip{margin:0;padding:5px 8px;background:#eef5fc;color:#24619a;border:1px solid #d5e5f5;font-size:11px}
+#openListPanel .ol-category-edit{margin:6px 0;border:1px solid #eee;border-radius:5px;padding:6px}
+#openListPanel .ol-category-edit summary{cursor:pointer;font-size:11px;color:#444;font-weight:700}
+.open-list-pages .ltable th{font-size:14px;line-height:1.2;padding:4px 3px}
+.open-list-pages .ltable td{height:auto;min-height:46px;padding:5px 4px;font-size:12.5px;line-height:1.3}
+.open-list-pages .ol-top td{height:36px;min-height:36px;background:#dfead7;text-align:center;font-weight:800;font-size:16px}
+.open-list-pages .ol-group td{height:34px;min-height:34px;background:#e8f2e0;text-align:center;font-weight:800;font-size:15px}
+.open-list-pages .ol-category td{height:30px;min-height:30px;background:#f7faf4;text-align:center;font-weight:700;font-size:13px}
+.open-list-pages .ol-empty td{height:36px;text-align:center;color:#888}
+.open-list-pages .ol-no{text-align:center;white-space:nowrap}
+.open-list-pages .ol-name{font-weight:700;font-size:13px}
+.open-list-pages .ol-spec,.open-list-pages .ol-note{font-size:11.5px;line-height:1.35;word-break:break-all}
+.open-list-pages .ol-center{text-align:center}
+.open-list-pages .ol-price,.open-list-pages .ol-amount{text-align:center;white-space:nowrap}
+.open-list-pages .ol-img{text-align:center;padding:2px!important}
+.open-list-pages .ol-img img{max-width:100%;max-height:62px;object-fit:contain;display:block;margin:0 auto}
+.open-list-page.s34 .ltable th{font-size:12px;padding:3px 2px}
+.open-list-page.s34 .ltable td{font-size:11px;padding:4px 2px}
+.open-list-page.s34 .ol-group td{font-size:13px}
+.open-list-page.s34 .ol-name{font-size:11.5px}
+.open-list-page.s34 .ol-spec,.open-list-page.s34 .ol-note{font-size:10px}
+
 </style>
 </head>
 <body>
@@ -242,6 +288,7 @@ button.gr{background:#5a8}
 <label>海报模板</label>
 <div class="mode"><button class="on" id="tb-white" onclick="setTpl('white')">白底模板</button><button id="tb-red" onclick="setTpl('red')">红色大促</button><button id="tb-gold" onclick="setTpl('gold')">金色推荐</button><button id="tb-table" onclick="setTpl('table')">表格模式</button><button id="tb-list" onclick="setTpl('list')">采购清单</button></div>
 <div class="mode" style="margin-top:6px"><button id="tb-quote" onclick="setTpl('quote')">报价单（双栏比价）</button><button id="tb-quote-detail" onclick="setTpl('quote-detail')">报价单（明细表）</button></div>
+<div class="mode" style="margin-top:6px"><button id="tb-open-list" onclick="setTpl('open-list')">酒店开业配置清单</button></div>
 <div id="listSize" style="display:none">
   <div id="listTplRow">
     <label>清单类型</label>
@@ -267,6 +314,7 @@ button.gr{background:#5a8}
 <div id="editArea"></div>
 <div id="listPanel" style="display:none"></div>
 <div id="detailQuotePanel" style="display:none"></div>
+<div id="openListPanel" style="display:none"></div>
 <button style="margin-top:6px;background:#5a8" onclick="saveSnap()">保存本轮编辑</button><button style="margin-top:6px;margin-left:4px" onclick="renderHistory()">查看保存记录</button>
 <div id="histArea"></div>
 <div class="upd-wrap">
@@ -287,6 +335,7 @@ button.gr{background:#5a8}
 <div id="cardBox" hidden></div>
 <script>
 let mode='grid', tpl='white', DATA={}, SPECS={}, MARKET_CATEGORIES=null, edits={}, idsKey='', WM=false;
+var OPEN_LIST_CONFIG=null, OPEN_LIST_COUNTER=0, OPEN_LIST_TREE_CACHE=null;
 function wmHTML(w,h){
   const text='携程服务市场 TripMALL', stepX=330, stepY=190;
   let out='';
@@ -307,8 +356,9 @@ async function loadData(bust){ const q=bust?('?v='+Date.now()):'?v=4';
   try{ DATA = await fetch('data/products.json'+q).then(r=>r.json()); }catch(e){ DATA={}; }
   try{ SPECS = await fetch('data/specs.json'+(bust?('?v='+Date.now()):'?v=1')).then(r=>r.json()); }catch(e){ SPECS={}; }
   try{ MARKET_CATEGORIES = await fetch('data/market-categories.json'+(bust?('?v='+Date.now()):'?v=1')).then(r=>r.json()); }catch(e){ MARKET_CATEGORIES=null; }
+  OPEN_LIST_TREE_CACHE=null;
   const n=Object.keys(DATA).length, m=Object.keys(SPECS).length;
-  document.getElementById('hint').innerText = '已加载商品 '+n+' 个'+(m?('，规格库 '+m+' 个'):'（规格库未加载）')+'。每行填一个商品ID。'; gen(); loadMeta(); }
+  document.getElementById('hint').innerText = '已加载商品 '+n+' 个'+(m?('，规格库 '+m+' 个'):'（规格库未加载）')+'。每行填一个商品ID。'; gen(); if(tpl==='open-list'){openListRenderCascade();openListRenderSelected();openListRenderEditors();} loadMeta(); }
 /* ===== 数据更新：时间 / 报表 / 检查更新（轮询本机 8790 端口） ===== */
 var META=null, updTimer=null;
 async function loadMeta(){ try{ META=await fetch('data/update-meta.json?v='+Date.now()).then(r=>r.json()); }catch(e){ META=null; } renderMeta(); }
@@ -354,7 +404,7 @@ async function pollProgress(){
   }
 }
 async function reloadData(){ await loadData(true); await loadMeta(); alert('数据已刷新'); }
-function setTpl(t){tpl=t;['white','red','gold','table','list','quote','quote-detail'].forEach(function(k){var b=document.getElementById('tb-'+k); if(b) b.classList.toggle('on',t===k);});gen();}
+function setTpl(t){tpl=t;['white','red','gold','table','list','quote','quote-detail','open-list'].forEach(function(k){var b=document.getElementById('tb-'+k); if(b) b.classList.toggle('on',t===k);});gen();}
 function setMode(m){mode=m;document.getElementById('mb-grid').classList.toggle('on',m==='grid');document.getElementById('mb-single').classList.toggle('on',m==='single');gen();}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var UNIT_WORDS=['件','个','只','支','条','套','瓶','包','袋','盒','箱','桶','张','台','把','块','片','组','份','卷','米','公斤','对','副','听','罐','床','捆','扎','双','顶','扇','盏','匹','部','艘','辆','间','位','次','天','平方','平方米','码','磅'];
@@ -420,7 +470,14 @@ function buildEditors(ids){
 async function gen(){
   const ids=document.getElementById('ids').value.trim().split(/\s+/).filter(Boolean);
   const area=document.getElementById('editArea');
-  if(tpl==='quote-detail'){
+  if(tpl==='open-list'){
+    if(area) area.innerHTML='';
+    idsKey='';
+    const box=document.getElementById('cardBox'); box.innerHTML=card([]);
+    const pv=document.getElementById('preview'); pv.innerHTML=''; if(box.firstElementChild) pv.appendChild(box.firstElementChild.cloneNode(true));
+    return;
+  }
+  if(tpl==='quote-detail'){ 
     if(area) area.innerHTML='';
     idsKey='';
     const box=document.getElementById('cardBox'); box.innerHTML=card([]);
@@ -1277,19 +1334,284 @@ function detailQuoteCards(){
   return out+'</div>';
 }
 
+function openListDefaults(){
+  return {title:'酒店开业配置清单（'+new Date().getFullYear()+'年版）',l1:'',l2:'',selected:{},rows:{}};
+}
+function openListInit(){
+  if(OPEN_LIST_CONFIG) return OPEN_LIST_CONFIG;
+  var saved=null;
+  try{ saved=JSON.parse(localStorage.getItem('tme_open_list_v2')||'null'); }catch(e){ saved=null; }
+  OPEN_LIST_CONFIG=(saved&&typeof saved==='object')?saved:openListDefaults();
+  OPEN_LIST_CONFIG.title=String(OPEN_LIST_CONFIG.title||'酒店开业配置清单');
+  OPEN_LIST_CONFIG.l1=String(OPEN_LIST_CONFIG.l1||'');
+  OPEN_LIST_CONFIG.l2=String(OPEN_LIST_CONFIG.l2||'');
+  var selected=OPEN_LIST_CONFIG.selected&&typeof OPEN_LIST_CONFIG.selected==='object'?OPEN_LIST_CONFIG.selected:{};
+  OPEN_LIST_CONFIG.selected={};
+  Object.keys(selected).forEach(function(k){if(selected[k]) OPEN_LIST_CONFIG.selected[k]=true;});
+  var rows=OPEN_LIST_CONFIG.rows&&typeof OPEN_LIST_CONFIG.rows==='object'?OPEN_LIST_CONFIG.rows:{};
+  OPEN_LIST_CONFIG.rows={};
+  Object.keys(rows).forEach(function(id){var x=rows[id]||{};OPEN_LIST_CONFIG.rows[String(id)]={qty:String(x.qty==null?'':x.qty),unit:String(x.unit==null?'':x.unit),price:String(x.price==null?'':x.price),note:String(x.note==null?'':x.note)};});
+  return OPEN_LIST_CONFIG;
+}
+function openListSave(){
+  try{ localStorage.setItem('tme_open_list_v2',JSON.stringify(OPEN_LIST_CONFIG)); var s=document.getElementById('ol-save-state'); if(s) s.textContent='已自动保存到本机'; }
+  catch(e){ var s2=document.getElementById('ol-save-state'); if(s2) s2.textContent='本地保存失败：'+e.message; }
+}
+function openListItemValues(id,p){
+  var c=openListInit(), saved=c.rows[String(id)]||{}, edit=edits[String(id)]||{};
+  return {qty:String(saved.qty==null?'':saved.qty),unit:String(saved.unit!=null?saved.unit:unitOf(id,p&&p.name,edit)),price:String(saved.price!=null?saved.price:(edit.price!=null?edit.price:(p&&p.price!=null?p.price:''))),note:String(saved.note==null?'':saved.note)};
+}
+function openListPriceNumber(value){
+  var s=String(value==null?'':value).replace(/[￥¥,\s]/g,'');
+  if(!s) return null;
+  var n=Number(s); return Number.isFinite(n)&&n>=0?n:null;
+}
+function openListAmount(qty,price){
+  var q=openListPriceNumber(qty), p=openListPriceNumber(price);
+  if(q===null||p===null) return '';
+  return (Math.round((q*p+Number.EPSILON)*100)/100).toFixed(2).replace(/\.?0+$/,'');
+}
+function openListSpecs(id){
+  var sp=SPECS[String(id)]||{};
+  return listStdParams(Array.isArray(sp.p)?sp.p:[]);
+}
+function openListTree(){
+  if(!OPEN_LIST_TREE_CACHE) OPEN_LIST_TREE_CACHE=detailQuoteTree();
+  return OPEN_LIST_TREE_CACHE;
+}
+function openListSelectedCategories(){
+  var c=openListInit(), tree=openListTree(), out=[];
+  Object.keys(tree).forEach(function(l1){
+    Object.keys(tree[l1]).forEach(function(l2){
+      Object.keys(tree[l1][l2]).forEach(function(leaf){
+        var key=detailQuoteKey(l1,l2,leaf);
+        if(!c.selected[key]) return;
+        out.push({key:key,l1:l1,l2:l2,l3:leaf.split('\u0002')[0],ids:tree[l1][l2][leaf]||[]});
+      });
+    });
+  });
+  return out;
+}
+function openListCategoryGroups(){
+  return openListSelectedCategories().map(function(cat){
+    var items=cat.ids.map(function(id){var p=DATA[String(id)];return p?{id:String(id),product:p,values:openListItemValues(String(id),p)}:null;}).filter(Boolean);
+    items.sort(function(a,b){return (parseFloat(a.values.price)||0)-(parseFloat(b.values.price)||0);});
+    return {key:cat.key,l1:cat.l1,l2:cat.l2,l3:cat.l3,items:items};
+  });
+}
+function openListRenderCascade(){
+  var host=document.getElementById('ol-cascade'); if(!host) return;
+  var c=openListInit(), tree=openListTree(), first=Object.keys(tree);
+  if(!first.length){host.innerHTML='<div class="ol-help">类目树暂不可用，请刷新页面后重试。</div>';return;}
+  if(c.l1&&!tree[c.l1]){c.l1='';c.l2='';}
+  var seconds=c.l1?tree[c.l1]:null;
+  if(seconds&&!seconds[c.l2]) c.l2='';
+  var secondNames=seconds?Object.keys(seconds):[], third=seconds&&c.l2?seconds[c.l2]:null;
+  var selectedCount=openListSelectedCategories().length;
+  var h='<div class="dq-level"><label>一级类目</label><div class="dq-options">';
+  first.forEach(function(l1){
+    var count=0; Object.keys(tree[l1]).forEach(function(l2){Object.keys(tree[l1][l2]).forEach(function(l3){if(c.selected[detailQuoteKey(l1,l2,l3)])count++;});});
+    h+='<button type="button" class="dq-nav'+(c.l1===l1?' on':'')+'" data-ol-nav="first" data-ol-value="'+esc(l1)+'">'+esc(l1)+(count?'<span>已选 '+count+'</span>':'')+'</button>';
+  });
+  h+='</div></div>';
+  if(seconds){
+    h+='<div class="dq-level"><label>二级类目 · '+esc(c.l1)+'</label><div class="dq-options">';
+    secondNames.forEach(function(l2){
+      var count=0; Object.keys(seconds[l2]).forEach(function(l3){if(c.selected[detailQuoteKey(c.l1,l2,l3)])count++;});
+      h+='<button type="button" class="dq-nav'+(c.l2===l2?' on':'')+'" data-ol-nav="second" data-ol-value="'+esc(l2)+'">'+esc(l2)+(count?'<span>已选 '+count+'</span>':'')+'</button>';
+    });
+    h+='</div></div>';
+  }
+  if(third){
+    h+='<div class="dq-level"><label>三级类目 · '+esc(c.l2)+'</label><div class="dq-options">';
+    Object.keys(third).forEach(function(leaf){
+      var key=detailQuoteKey(c.l1,c.l2,leaf), n=(third[leaf]||[]).length;
+      h+='<label class="dq-leaf"><input type="checkbox" data-ol-key="'+esc(key)+'" '+(c.selected[key]?'checked':'')+' '+(!n?'disabled':'')+'>'+esc(leaf.split('\u0002')[0])+'<span>('+n+')</span></label>';
+    });
+    h+='</div><div class="dq-actions"><button type="button" data-ol-action="select-current">全选当前二级</button><button type="button" data-ol-action="clear-current">清空当前二级</button></div></div>';
+  }
+  host.innerHTML=h;
+  var countEl=document.getElementById('ol-selected-count'); if(countEl) countEl.textContent='已选 '+selectedCount+' 个三级类目';
+}
+function openListRenderSelected(){
+  var host=document.getElementById('ol-selected'); if(!host) return;
+  var selected=openListSelectedCategories();
+  if(!selected.length){host.innerHTML='<div class="ol-help">尚未选择三级类目。选中后会自动拉取该类商品。</div>';return;}
+  host.innerHTML=selected.map(function(c){
+    var path=c.l1+' / '+c.l2+' / '+c.l3;
+    return '<button type="button" class="dq-chip" data-ol-action="remove-category" data-ol-key="'+esc(c.key)+'" title="'+esc(path)+'">'+esc(c.l2+' · '+c.l3)+' × ('+c.ids.length+')</button>';
+  }).join('');
+}
+function openListRenderEditors(){
+  var host=document.getElementById('ol-editors'); if(!host) return;
+  var groups=openListCategoryGroups();
+  if(!groups.length){host.innerHTML='';return;}
+  host.innerHTML=groups.map(function(g){
+    return '<details class="ol-category-edit" data-ol-category="'+esc(g.key)+'"><summary>'+esc(g.l1+' / '+g.l2+' / '+g.l3)+' · '+g.items.length+' 个商品</summary><div class="ol-editor-body"><div class="ol-help">展开后加载商品编辑项，可填写数量、备注或修正单位/单价。</div></div></details>';
+  }).join('');
+}
+function openListRenderEditorDetails(details){
+  var key=details.getAttribute('data-ol-category'), group=openListCategoryGroups().filter(function(g){return g.key===key;})[0];
+  if(!group) return;
+  var body=details.querySelector('.ol-editor-body'); if(!body||body.getAttribute('data-rendered')==='1') return;
+  body.setAttribute('data-rendered','1');
+  group.items.forEach(function(x,i){
+    var name=(edits[x.id]&&edits[x.id].name!=null)?edits[x.id].name:(x.product.name||('商品'+x.id)), v=x.values;
+    var row=document.createElement('div'); row.className='ol-row-editor';
+    row.innerHTML='<div class="ol-row-name">A'+(i+1)+' · '+esc(name)+'　ID '+esc(x.id)+'</div>'
+      +'<div class="ol-row-fields"><label>数量<input inputmode="decimal" value="'+esc(v.qty)+'" data-ol-field="qty" data-product-id="'+esc(x.id)+'"></label>'
+      +'<label>单位<input value="'+esc(v.unit)+'" data-ol-field="unit" data-product-id="'+esc(x.id)+'"></label>'
+      +'<label>单价<input inputmode="decimal" value="'+esc(v.price)+'" data-ol-field="price" data-product-id="'+esc(x.id)+'"></label>'
+      +'<label>备注<textarea rows="2" data-ol-field="note" data-product-id="'+esc(x.id)+'">'+esc(v.note)+'</textarea></label></div>';
+    body.appendChild(row);
+  });
+}
+function openListRefreshCategories(){
+  openListSave(); openListRenderCascade(); openListRenderSelected(); openListRenderEditors(); gen();
+}
+function openListUI(){
+  var el=document.getElementById('openListPanel'); if(!el) return;
+  if(el.getAttribute('data-shown')==='1') return;
+  var c=openListInit(); el.setAttribute('data-shown','1');
+  el.innerHTML='<div class="ol-fields"><label>清单标题<input id="ol-title" data-ol-field="title" value="'+esc(c.title)+'"></label></div>'
+    +'<div class="ol-help">按网站商品库的一级、二级、三级类目筛选；勾选三级类目后会自动拉取该类商品及其商品图片、规格和价格。数量与备注可按需编辑。</div>'
+    +'<div id="ol-cascade"></div><div class="dq-summary"><label id="ol-selected-count">已选 0 个三级类目</label><div class="dq-selected" id="ol-selected"></div><div class="dq-actions"><button type="button" data-ol-action="clear-all">清空全部已选</button></div></div>'
+    +'<label>已拉取商品（展开类目可编辑数量、单位、单价和备注）</label><div id="ol-editors"></div><div class="ol-save-state" id="ol-save-state">清单会自动保存在本机浏览器。</div>';
+  openListRenderCascade(); openListRenderSelected(); openListRenderEditors();
+  el.oninput=function(e){
+    var f=e.target.getAttribute('data-ol-field'); if(!f) return;
+    var c=openListInit();
+    if(f==='title') c.title=e.target.value;
+    else {
+      var id=e.target.getAttribute('data-product-id'), p=DATA[String(id)];
+      if(!id||!p||['qty','unit','price','note'].indexOf(f)<0) return;
+      var row=c.rows[String(id)]||openListItemValues(String(id),p);
+      row[f]=e.target.value; c.rows[String(id)]=row;
+    }
+    openListSave(); gen();
+  };
+  el.onchange=function(e){
+    var key=e.target.getAttribute('data-ol-key'); if(!key||e.target.type!=='checkbox') return;
+    if(e.target.checked) c.selected[key]=true; else delete c.selected[key];
+    openListRefreshCategories();
+  };
+  el.onclick=function(e){
+    var summary=e.target.closest('summary'), details=summary&&summary.closest('details.ol-category-edit');
+    if(details) openListRenderEditorDetails(details);
+    var nav=e.target.closest('button[data-ol-nav]');
+    if(nav){
+      var level=nav.getAttribute('data-ol-nav'), value=nav.getAttribute('data-ol-value');
+      if(level==='first'){if(c.l1!==value)c.l2='';c.l1=value;}
+      else if(level==='second') c.l2=value;
+      openListSave(); openListRenderCascade(); return;
+    }
+    var b=e.target.closest('button[data-ol-action]'); if(!b||!el.contains(b)) return;
+    var action=b.getAttribute('data-ol-action'), key=b.getAttribute('data-ol-key');
+    if(action==='select-current'||action==='clear-current'){
+      var tree=openListTree(), leaves=tree[c.l1]&&tree[c.l1][c.l2];
+      if(leaves) Object.keys(leaves).forEach(function(leaf){var k=detailQuoteKey(c.l1,c.l2,leaf);if(action==='select-current'&&(leaves[leaf]||[]).length)c.selected[k]=true;else delete c.selected[k];});
+    } else if(action==='clear-all') c.selected={};
+    else if(action==='remove-category') delete c.selected[key];
+    else return;
+    openListRefreshCategories();
+  };
+}
+function openListCols(){ return LIST_SIZE==='s34'?[36,145,160,42,52,72,72,265,200]:[42,175,180,48,60,88,88,303,220]; }
+var OPEN_LIST_HEADS=['序号','品名','规格','单位','数量','单价','金额','备注','图片'];
+function openListColgroup(){ return '<colgroup>'+openListCols().map(function(w){return '<col style="width:'+w+'px">';}).join('')+'</colgroup>'; }
+function openListThead(){ return '<thead><tr>'+OPEN_LIST_HEADS.map(function(x,i){return '<th style="width:'+openListCols()[i]+'px">'+x+'</th>';}).join('')+'</tr></thead>'; }
+function openListRows(){
+  var rows=[];
+  openListCategoryGroups().forEach(function(g){
+    var context=[{type:'level1',name:g.l1},{type:'level2',name:g.l2},{type:'level3',name:g.l3}];
+    context.forEach(function(row){rows.push(row);});
+    if(!g.items.length){rows.push({type:'empty'});return;}
+    g.items.forEach(function(x,i){rows.push({type:'item',id:x.id,product:x.product,values:x.values,index:i+1,context:context});});
+  });
+  return rows;
+}
+function openListRowHTML(row){
+  if(row.type==='level1') return '<tr class="ol-top"><td colspan="9">'+esc(row.name)+'</td></tr>';
+  if(row.type==='level2') return '<tr class="ol-group"><td colspan="9">'+esc(row.name)+'</td></tr>';
+  if(row.type==='level3') return '<tr class="ol-category"><td colspan="9">'+esc(row.name)+'</td></tr>';
+  if(row.type==='empty') return '<tr class="ol-empty"><td colspan="9">该三级类目下暂无商品数据</td></tr>';
+  var id=row.id, p=row.product||DATA[String(id)]||{}, e=edits[String(id)]||{}, item=row.values;
+  var name=e.name!=null?e.name:(p.name||('商品'+id));
+  var price=LIST_BLANK_PRICE?'':(String(item.price||'')?(esc(item.price)+' 元/'+esc(item.unit||'件')):'');
+  var amount=LIST_BLANK_PRICE?'':openListAmount(item.qty,item.price);
+  return '<tr><td class="ol-no">A'+row.index+'</td><td class="ol-name">'+esc(name)+'</td><td class="ol-spec">'+esc(openListSpecs(id))+'</td>'
+    +'<td class="ol-center">'+esc(item.unit)+'</td><td class="ol-center">'+esc(item.qty)+'</td><td class="ol-price">'+price+'</td><td class="ol-amount">'+esc(amount)+'</td>'
+    +'<td class="ol-note">'+esc(item.note)+'</td><td class="ol-img">'+imgHTML({id:id,image:p.image||''})+'</td></tr>';
+}
+function openListPageHTML(rows,pi,total){
+  var c=openListInit(), body=rows.map(openListRowHTML).join('');
+  return '<div class="'+listCardCls()+' open-list-page" data-page="'+(pi+1)+'"><div class="ltitle">'+esc(c.title)+'</div>'
+    +'<div class="lsub">按服务市场三级类目分组 · '+(LIST_SIZE==='s34'?'小红书 3:4':'A4 竖版')+'　　第 '+(pi+1)+' / '+total+' 页</div>'
+    +'<table class="ltable">'+openListColgroup()+openListThead()+'<tbody>'+body+'</tbody></table>'
+    +'<div class="lfoot"><span>数据来源：携程 eBooking 服务市场（TripMALL）　数量 / 备注由编辑者填写</span><span>第 '+(pi+1)+' / '+total+' 页</span></div></div>';
+}
+function openListCards(){
+  var categories=openListCategoryGroups(), rows=openListRows(), box=document.getElementById('cardBox');
+  if(!categories.length){
+    var c=openListInit();
+    return '<div class="'+listPagesCls()+' open-list-pages"><div class="'+listCardCls()+' open-list-page"><div class="ltitle">'+esc(c.title)+'</div><div class="lsub">按服务市场三级类目分组 · '+(LIST_SIZE==='s34'?'小红书 3:4':'A4 竖版')+'</div><div style="text-align:center;color:#888;padding:40px 20px">请在左侧选择至少一个三级类目，系统会自动拉取该类商品。</div></div></div>';
+  }
+  var prevHidden=box.hidden; box.hidden=false;
+  var probe=document.createElement('div'); probe.className=listPagesCls()+' open-list-pages '+listCardCls()+' open-list-page';
+  probe.style.cssText='position:absolute;left:-20000px;top:0;visibility:hidden';
+  probe.innerHTML='<div class="ltitle">x</div><div class="lsub">x</div><table class="ltable">'+openListColgroup()+openListThead()+'<tbody></tbody></table><div class="lfoot">x</div>';
+  box.appendChild(probe);
+  var table=probe.querySelector('.ltable'), tbody=probe.querySelector('tbody'), thead=probe.querySelector('thead');
+  var bodyAvail=probe.clientHeight-table.offsetTop-thead.getBoundingClientRect().height-34;
+  tbody.innerHTML=rows.map(openListRowHTML).join('');
+  var measured=Array.prototype.map.call(tbody.querySelectorAll('tr'),function(tr){return Math.round(tr.getBoundingClientRect().height)||52;});
+  probe.parentNode&&probe.parentNode.removeChild(probe); box.hidden=prevHidden;
+  var idx=0,blocks=categories.map(function(g){
+    var headers=rows.slice(idx,idx+3); idx+=3;
+    var count=g.items.length, items=[];
+    if(count){for(var i=0;i<count;i++)items.push(rows[idx++]);}
+    else items.push(rows[idx++]);
+    headers.forEach(function(h){h._height=measured[rows.indexOf(h)]||38;});
+    items.forEach(function(r){r._height=measured[rows.indexOf(r)]||52;});
+    return {headers:headers,items:items};
+  });
+  var pages=[],cur=[],used=0;
+  function flush(){if(cur.length){pages.push(cur);cur=[];used=0;}}
+  function addHeaders(headers){headers.forEach(function(h){cur.push(h);used+=h._height;});}
+  blocks.forEach(function(block){
+    var headH=block.headers.reduce(function(sum,h){return sum+h._height;},0);
+    if(used+headH+block.items[0]._height>bodyAvail&&cur.length) flush();
+    addHeaders(block.headers);
+    block.items.forEach(function(row,i){
+      if(used+row._height>bodyAvail&&cur.length&&i>0){
+        flush();
+        block.headers.forEach(function(h){cur.push({type:h.type,name:h.name,_height:h._height});used+=h._height;});
+      }
+      cur.push(row);used+=row._height;
+    });
+  });
+  flush();
+  var out='<div class="'+listPagesCls()+' open-list-pages">';
+  pages.forEach(function(pg,i){out+=openListPageHTML(pg,i,pages.length);});
+  return out+'</div>';
+}
+
 function card(items){
   var lp=document.getElementById('listPanel');
   var dqp=document.getElementById('detailQuotePanel');
+  var olp=document.getElementById('openListPanel');
   if(dqp) dqp.style.display=(tpl==='quote-detail')?'block':'none';
+  if(olp) olp.style.display=(tpl==='open-list')?'block':'none';
   var sz=document.getElementById('listSize');
   var tr=document.getElementById('listTplRow');
-  if(sz){ sz.style.display = (tpl==='list'||tpl==='table'||tpl==='quote'||tpl==='quote-detail') ? 'block' : 'none'; syncListBtns(); }
+  if(sz){ sz.style.display = (tpl==='list'||tpl==='table'||tpl==='quote'||tpl==='quote-detail'||tpl==='open-list') ? 'block' : 'none'; syncListBtns(); }
   if(tr) tr.style.display = (tpl==='list') ? 'block' : 'none';
   if(tpl==='list'){
     if(lp) lp.style.display='block';
     listUI(); return listCards();
   }
   if(tpl==='quote-detail'){ if(lp) lp.style.display='none'; detailQuoteUI(); return detailQuoteCards(); }
+  if(tpl==='open-list'){ if(lp) lp.style.display='none'; openListUI(); return openListCards(); }
   if(tpl==='quote'){ if(lp) lp.style.display='block'; listUI(); return quoteCard(); }
   if(lp) lp.style.display='none';
   return tpl==='red' ? redCard(items) : (tpl==='gold' ? goldCard(items) : (tpl==='table' ? tableCard(items) : whiteCard(items)));
@@ -1297,6 +1619,7 @@ function card(items){
 /* 导出文件名：按当前模板取名字 */
 function exportName(){
   if(tpl==='quote-detail') return '携程服务市场报价单明细表';
+  if(tpl==='open-list') return '酒店开业配置清单';
   if(tpl==='quote') return '酒店用品报价单';
   if(tpl==='table') return '产品规格明细表';
   if(tpl==='list')  return listDef().name;
